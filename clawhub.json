@@ -1,0 +1,12 @@
+{
+  "name": "ruvector-memory",
+  "version": "1.0.0",
+  "description": "Semantic vector memory for OpenClaw agents using RuVector/AgentDB. Self-learning search that improves over time. Validated: +20pp Recall@3 on conceptual queries vs grep baseline.",
+  "author": "liamhelmer-bel",
+  "license": "MIT",
+  "tags": ["memory", "vector-search", "ruvector", "agentdb", "semantic"],
+  "openclaw": {
+    "skillDir": ".",
+    "entrypoint": "SKILL.md"
+  }
+}

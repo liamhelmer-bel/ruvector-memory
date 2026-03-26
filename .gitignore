@@ -1,0 +1,6 @@
+eval/results/*.json
+eval/results/*.log
+eval/results/*.gz
+agentdb/
+*.skill
+*.db
