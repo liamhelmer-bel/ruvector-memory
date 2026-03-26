@@ -4,27 +4,27 @@ An [OpenClaw](https://openclaw.ai) skill that gives AI agents semantic vector me
 
 ## Why
 
-Keyword grep misses ~20% of conceptual queries — things like "what does liam do that isn't software" won't match anything even when the answer is clearly in your memory files. Vector search understands meaning, not just words.
+Keyword grep misses conceptual queries — things like "what tools does the team prefer for performance work" won't match anything even when the answer is clearly in your memory files. Vector search understands meaning, not just words.
 
 **Validated against a grep baseline** across 30 test cases (easy / medium / hard):
 
-| Tier    | System | Recall@3 | MRR   | Avg Latency |
-|---------|--------|----------|-------|-------------|
-| easy    | grep   | 80.0%    | 0.633 | 2107ms      |
-| easy    | vector | 50.0%    | 0.433 | 794ms       |
-| medium  | grep   | 80.0%    | 0.553 | —           |
-| medium  | vector | 80.0%    | 0.667 | —           |
-| **hard**| grep   | **50.0%**| 0.367 | —           |
-| **hard**| vector | **70.0%**| 0.500 | —           |
-| overall | grep   | 70.0%    | 0.518 | 2107ms      |
-| overall | vector | 66.7%    | 0.533 | **794ms**   |
+| Tier     | System | Recall@3  | MRR   | Avg Latency |
+|----------|--------|-----------|-------|-------------|
+| easy     | grep   | 80.0%     | 0.633 | 2107ms      |
+| easy     | vector | 50.0%     | 0.433 | 794ms       |
+| medium   | grep   | 80.0%     | 0.553 | —           |
+| medium   | vector | 80.0%     | 0.667 | —           |
+| **hard** | grep   | **50.0%** | 0.367 | —           |
+| **hard** | vector | **70.0%** | 0.500 | —           |
+| overall  | grep   | 70.0%     | 0.518 | 2107ms      |
+| overall  | vector | 66.7%     | 0.533 | **794ms**   |
 
 **Verdict: PASS** on all pre-committed criteria:
 - ✅ Vector Recall@3 on hard queries beats grep by **+20pp** (threshold: ≥15pp)
 - ✅ Overall vector MRR > grep MRR
 - ✅ Vector latency **2.7x faster** than grep (well under 10x limit)
 
-Vector wins where it matters: hard conceptual queries. Grep still wins on easy keyword lookups — both systems are useful.
+Vector wins where it matters: hard conceptual queries. Grep still edges it on simple keyword lookups — both systems remain useful.
 
 ## Architecture
 
@@ -43,7 +43,7 @@ AgentDB sits alongside your existing memory system. Flat files stay as the canon
 ### Requirements
 - Node.js 18+
 - `agentdb` v3.0.0-alpha.10 (`npm install -g agentdb@3.0.0-alpha.10`)
-- OpenClaw (for skill triggering)
+- OpenClaw
 
 ### Install
 
@@ -51,7 +51,7 @@ AgentDB sits alongside your existing memory system. Flat files stay as the canon
 npx clawhub@latest install ruvector-memory
 ```
 
-Or clone this repo and copy into your skills directory.
+Or clone this repo and copy into your OpenClaw skills directory.
 
 ### First-time setup
 
@@ -59,27 +59,27 @@ Or clone this repo and copy into your skills directory.
 bash skills/ruvector-memory/scripts/setup.sh
 ```
 
-This installs AgentDB, initializes the vector index, and ingests all existing memory files.
+Installs AgentDB, initializes the vector index, and ingests all existing memory files.
 
 ### Store a memory
 
 ```bash
-bash scripts/store.sh "Liam prefers Rust for performance-critical work" "MEMORY.md" "liam,preferences"
+bash scripts/store.sh "We use Rust for all performance-critical services" "MEMORY.md" "architecture,preferences"
 ```
 
 ### Query semantically
 
 ```bash
-bash scripts/query.sh "what languages does liam like" 5
+bash scripts/query.sh "what do we use for high-performance work" 5
 ```
 
-Returns semantically ranked results — no keyword match required.
+Returns semantically ranked results — no exact keyword match required.
 
 ### Ingest existing files
 
 ```bash
-bash scripts/ingest.sh ~/path/to/memory/
-bash scripts/ingest.sh ~/path/to/MEMORY.md
+bash scripts/ingest.sh path/to/memory/
+bash scripts/ingest.sh path/to/MEMORY.md
 ```
 
 ### Check status
@@ -102,14 +102,16 @@ A full scientific eval is included in `eval/`:
 
 ```bash
 cd eval
-bash run_eval.sh          # full run (~25 min, uses local Qwen for judging)
+bash run_eval.sh            # full run (uses local LLM for judging)
 bash run_eval.sh --limit 5  # quick smoke test
 ```
 
 - 30 hand-crafted test cases across easy / medium / hard tiers
 - LLM-as-judge (blind, 0-3 relevance scale) with 4-worker parallelism
-- Pre-committed pass/fail criteria (set before running, can't be moved)
+- Pre-committed pass/fail criteria (set before running — no moving goalposts)
 - See `eval/results/summary.md` for latest results
+
+The eval is designed to be rerun against any agent's own memory files. Swap in your own `test_cases.jsonl` and point the scripts at your memory directory.
 
 ## Files
 
@@ -130,7 +132,7 @@ ruvector-memory/
     ├── run_eval.sh           — orchestrator
     ├── grep_search.sh        — baseline
     ├── vector_search.sh      — treatment
-    ├── judge.py              — LLM judge (parallel)
+    ├── judge.py              — LLM judge (parallel, 4 workers)
     └── results/summary.md    — latest results
 ```
 
